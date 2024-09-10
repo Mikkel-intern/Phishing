@@ -1,0 +1,32 @@
+from flask import Flask, request, redirect
+import logging
+from datetime import datetime
+ 
+app = Flask(__name__)
+ 
+# Configure logging
+logging.basicConfig(filename='clicks.log', level=logging.INFO, format='%(asctime)s - %(message)s', filemode='a')
+ 
+# Mapping of URL identifiers to real URLs
+URL_MAP = {
+    'github-link': 'http://example.com'  # The actual target
+}
+ 
+@app.route('/track/<path:url_id>/<employee_id>')
+def track(url_id, employee_id):
+    # Log click information
+    user_ip = request.remote_addr
+    user_agent = request.headers.get('User-Agent')
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    # Log the employee ID along with other details
+    logging.info(f'URL_ID: {url_id} - Employee ID: {employee_id} - IP: {user_ip} - User-Agent: {user_agent} - Timestamp: {timestamp}')
+    # Use URL_MAP to redirect to the actual URL
+    if url_id in URL_MAP:
+        target_url = URL_MAP[url_id]
+        return redirect(target_url)
+    else:
+        return 'Invalid URL', 404
+ 
+if __name__ == '__main__':
+    # Bind the server to '0.0.0.0' to make it publicly accessible via Localtunnel
+    app.run(host='0.0.0.0', port=5000, debug=True)
